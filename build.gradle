@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'ua.ie23s.app.'
+group 'ua.ie23s.app.felix'
 version '1.0-SNAPSHOT'
 
 repositories {
@@ -16,4 +16,11 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'ua.ie23s.app.felix.Felix'
+        )
+    }
 }
