@@ -1,24 +1,19 @@
 package ua.ie23s.app.felix;
 
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.ByteBuffer;
-import java.security.SecureRandom;
-import java.util.zip.CRC32;
 
 public class Felix {
     private static TrayIcon trayIcon = null;
 
     private static boolean isOn = false;
-    private static MenuItem action;
 
     //start of main method
     public static void main(String[] args) {
+
+        Key key = new Key();
 
         //checking for support
         if (!SystemTray.isSupported()) {
@@ -36,9 +31,18 @@ public class Felix {
         //popupmenu
         PopupMenu trayPopupMenu = new PopupMenu();
 
-        //1t menuitem for popupmenu
-        action = new MenuItem("On");
-        action.addActionListener(actionEvent -> {
+        //2nd menuitem of popupmenu
+        MenuItem close = new MenuItem("Close");
+        close.addActionListener(e -> System.exit(0));
+        trayPopupMenu.add(close);
+
+        //setting tray icon
+        trayIcon = new TrayIcon(Toolkit.getDefaultToolkit().getImage(
+                ClassLoader.getSystemResource("no.png")), "SystemTray Demo", trayPopupMenu);
+        //adjust to default size as per system recommendation
+        trayIcon.setImageAutoSize(true);
+
+        trayIcon.addActionListener(actionEvent -> {
             if (isOn) {
                 off();
             } else {
@@ -55,18 +59,6 @@ public class Felix {
                 e.printStackTrace();
             }
         });
-        trayPopupMenu.add(action);
-
-        //2nd menuitem of popupmenu
-        MenuItem close = new MenuItem("Close");
-        close.addActionListener(e -> System.exit(0));
-        trayPopupMenu.add(close);
-
-        //setting tray icon
-        trayIcon = new TrayIcon(Toolkit.getDefaultToolkit().getImage(
-                ClassLoader.getSystemResource("no.png")), "SystemTray Demo", trayPopupMenu);
-        //adjust to default size as per system recommendation
-        trayIcon.setImageAutoSize(true);
 
         try {
             systemTray.add(trayIcon);
@@ -82,7 +74,6 @@ public class Felix {
     private static void off() {
         trayIcon.setImage(Toolkit.getDefaultToolkit().getImage(
                 ClassLoader.getSystemResource("off.png")));
-        action.setLabel("On");
         isOn = false;
 
     }
@@ -90,7 +81,6 @@ public class Felix {
     private static void on() {
         trayIcon.setImage(Toolkit.getDefaultToolkit().getImage(
                 ClassLoader.getSystemResource("on.png")));
-        action.setLabel("Off");
         isOn = true;
 
     }
@@ -118,33 +108,5 @@ public class Felix {
             get();
         }
 
-    }
-    private String randomKey() {
-
-        ///this is user supplied string
-        String a = "ABCDEFGHI";
-        int mySaltSizeInBytes = 32;
-        //SecureRandom class provides strong random numbers
-        SecureRandom random = new SecureRandom();
-
-        //salt mitigates dictionary/rainbow attacks
-        byte[] salt = new byte[mySaltSizeInBytes];
-
-        //random fill salt buffer with random bytes
-        random.nextBytes(salt);
-
-        //concatenates string a  and salt
-        //into one big bytebuffer ready to be digested
-        //this is just one way to do it
-        //there might be better ways
-
-        ByteBuffer bbuffer = ByteBuffer.allocate(mySaltSizeInBytes+a.length());
-        bbuffer.put(salt);
-        bbuffer.put(a.getBytes());
-
-        //your crc class
-        CRC32 crc = new CRC32();
-        crc.update(bbuffer.array());
-        return Long.toHexString(crc.getValue());
     }
 }
